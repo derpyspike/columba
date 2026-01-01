@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import com.lxmf.messenger.data.db.entity.LocalIdentityEntity
 import com.lxmf.messenger.data.repository.IdentityRepository
+import com.lxmf.messenger.map.MapTileSourceManager
 import com.lxmf.messenger.repository.SettingsRepository
 import com.lxmf.messenger.reticulum.model.NetworkStatus
 import com.lxmf.messenger.reticulum.protocol.ReticulumProtocol
@@ -56,6 +57,7 @@ class SettingsViewModelTest {
     private lateinit var interfaceConfigManager: InterfaceConfigManager
     private lateinit var propagationNodeManager: PropagationNodeManager
     private lateinit var locationSharingManager: LocationSharingManager
+    private lateinit var mapTileSourceManager: MapTileSourceManager
     private lateinit var viewModel: SettingsViewModel
 
     // Mutable flows for controlling test scenarios
@@ -86,6 +88,7 @@ class SettingsViewModelTest {
         interfaceConfigManager = mockk(relaxed = true)
         propagationNodeManager = mockk(relaxed = true)
         locationSharingManager = mockk(relaxed = true)
+        mapTileSourceManager = mockk(relaxed = true)
 
         // Mock locationSharingManager flows
         every { locationSharingManager.activeSessions } returns MutableStateFlow(emptyList())
@@ -136,6 +139,7 @@ class SettingsViewModelTest {
             interfaceConfigManager = interfaceConfigManager,
             propagationNodeManager = propagationNodeManager,
             locationSharingManager = locationSharingManager,
+            mapTileSourceManager = mapTileSourceManager,
         )
     }
 
@@ -1430,6 +1434,7 @@ class SettingsViewModelTest {
                     interfaceConfigManager = interfaceConfigManager,
                     propagationNodeManager = propagationNodeManager,
                     locationSharingManager = locationSharingManager,
+                    mapTileSourceManager = mapTileSourceManager,
                 )
 
             viewModel.state.test {
@@ -1472,6 +1477,7 @@ class SettingsViewModelTest {
                     interfaceConfigManager = interfaceConfigManager,
                     propagationNodeManager = propagationNodeManager,
                     locationSharingManager = locationSharingManager,
+                    mapTileSourceManager = mapTileSourceManager,
                 )
 
             viewModel.state.test {
@@ -2060,6 +2066,7 @@ class SettingsViewModelTest {
                     interfaceConfigManager = interfaceConfigManager,
                     propagationNodeManager = propagationNodeManager,
                     locationSharingManager = locationSharingManager,
+                    mapTileSourceManager = mapTileSourceManager,
                 )
 
             // Wait for any potential async operations to settle
@@ -2099,6 +2106,7 @@ class SettingsViewModelTest {
                     interfaceConfigManager = interfaceConfigManager,
                     propagationNodeManager = propagationNodeManager,
                     locationSharingManager = locationSharingManager,
+                    mapTileSourceManager = mapTileSourceManager,
                 )
 
             // The ViewModel should be created successfully with ServiceReticulumProtocol

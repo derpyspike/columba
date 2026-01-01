@@ -1100,12 +1100,13 @@ class KotlinBLEBridge(
             // Also re-fire connected callback to restore full state
             val peer = connectedPeers[address]
             if (peer != null) {
-                val roleString = when {
-                    peer.isCentral && peer.isPeripheral -> "both"
-                    peer.isCentral -> "central"
-                    peer.isPeripheral -> "peripheral"
-                    else -> "unknown"
-                }
+                val roleString =
+                    when {
+                        peer.isCentral && peer.isPeripheral -> "both"
+                        peer.isCentral -> "central"
+                        peer.isPeripheral -> "peripheral"
+                        else -> "unknown"
+                    }
                 onConnected?.callAttr("__call__", address, peer.mtu, roleString, identityHash)
                 Log.d(TAG, "Identity resync: re-fired onConnected for $address")
             }

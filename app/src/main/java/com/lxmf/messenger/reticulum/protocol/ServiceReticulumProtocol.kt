@@ -2084,21 +2084,22 @@ class ServiceReticulumProtocol(
 
         // Extract icon appearance (LXMF Field 4 - Sideband/MeshChat interop)
         // Check both top-level "icon_appearance" (callback path) and "fields.4" (polling path)
-        val iconAppearance = (
-            json.optJSONObject("icon_appearance")
-                ?: json.optJSONObject("fields")?.optJSONObject("4")
-        )?.let { iconJson ->
-            try {
-                IconAppearance(
-                    iconName = iconJson.optString("icon_name", ""),
-                    foregroundColor = iconJson.optString("foreground_color", ""),
-                    backgroundColor = iconJson.optString("background_color", ""),
-                )
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to parse icon appearance", e)
-                null
+        val iconAppearance =
+            (
+                json.optJSONObject("icon_appearance")
+                    ?: json.optJSONObject("fields")?.optJSONObject("4")
+            )?.let { iconJson ->
+                try {
+                    IconAppearance(
+                        iconName = iconJson.optString("icon_name", ""),
+                        foregroundColor = iconJson.optString("foreground_color", ""),
+                        backgroundColor = iconJson.optString("background_color", ""),
+                    )
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to parse icon appearance", e)
+                    null
+                }
             }
-        }
 
         return ReceivedMessage(
             messageHash = messageHash,
@@ -2129,11 +2130,12 @@ class ServiceReticulumProtocol(
             val formatsArray = json.optJSONArray("rmsp_formats")
             val layersArray = json.optJSONArray("rmsp_layers")
             val dataUpdated = json.optLong("rmsp_updated", 0)
-            val dataSize = if (json.has("rmsp_size") && !json.isNull("rmsp_size")) {
-                json.optLong("rmsp_size")
-            } else {
-                null
-            }
+            val dataSize =
+                if (json.has("rmsp_size") && !json.isNull("rmsp_size")) {
+                    json.optLong("rmsp_size")
+                } else {
+                    null
+                }
 
             // Parse arrays
             val coverage = mutableListOf<String>()
@@ -2175,7 +2177,7 @@ class ServiceReticulumProtocol(
             // Store in repository using protocolScope
             protocolScope.launch {
                 try {
-                    rmspServerRepository.upsertServer(
+                    val announce = com.lxmf.messenger.data.repository.RmspServerAnnounce(
                         destinationHash = destHashHex,
                         serverName = serverName,
                         publicKey = publicKey,
@@ -2189,6 +2191,7 @@ class ServiceReticulumProtocol(
                         version = version,
                         hops = hops,
                     )
+                    rmspServerRepository.upsertServer(announce)
                     Log.d(TAG, "RMSP server stored: $serverName")
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to store RMSP server: ${e.message}", e)
@@ -2209,8 +2212,9 @@ class ServiceReticulumProtocol(
     suspend fun getRmspServers(): List<Map<String, Any>> {
         return kotlinx.coroutines.withContext(Dispatchers.IO) {
             try {
-                val service = this@ServiceReticulumProtocol.service
-                    ?: return@withContext emptyList()
+                val service =
+                    this@ServiceReticulumProtocol.service
+                        ?: return@withContext emptyList()
 
                 val resultJson = service.rmspServers
                 val jsonArray = JSONArray(resultJson)
@@ -2256,8 +2260,9 @@ class ServiceReticulumProtocol(
     ): ByteArray? {
         return kotlinx.coroutines.withContext(Dispatchers.IO) {
             try {
-                val service = this@ServiceReticulumProtocol.service
-                    ?: throw IllegalStateException("Service not bound")
+                val service =
+                    this@ServiceReticulumProtocol.service
+                        ?: throw IllegalStateException("Service not bound")
 
                 Log.d(TAG, "🗺️ Fetching RMSP tiles: geohash=$geohash, zoom=$zoomMin-$zoomMax")
 

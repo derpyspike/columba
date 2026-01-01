@@ -76,11 +76,11 @@ import com.lxmf.messenger.ui.screens.MyIdentityScreen
 import com.lxmf.messenger.ui.screens.NotificationSettingsScreen
 import com.lxmf.messenger.ui.screens.QrScannerScreen
 import com.lxmf.messenger.ui.screens.SettingsScreen
-import com.lxmf.messenger.ui.screens.offlinemaps.OfflineMapDownloadScreen
-import com.lxmf.messenger.ui.screens.offlinemaps.OfflineMapsScreen
 import com.lxmf.messenger.ui.screens.ThemeEditorScreen
 import com.lxmf.messenger.ui.screens.ThemeManagementScreen
 import com.lxmf.messenger.ui.screens.WelcomeScreen
+import com.lxmf.messenger.ui.screens.offlinemaps.OfflineMapDownloadScreen
+import com.lxmf.messenger.ui.screens.offlinemaps.OfflineMapsScreen
 import com.lxmf.messenger.ui.screens.tcpclient.TcpClientWizardScreen
 import com.lxmf.messenger.ui.theme.ColumbaTheme
 import com.lxmf.messenger.viewmodel.ContactsViewModel

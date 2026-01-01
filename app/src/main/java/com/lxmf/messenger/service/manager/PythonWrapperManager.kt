@@ -519,8 +519,9 @@ class PythonWrapperManager(
     fun getRmspServersForGeohash(geohash: String): String? =
         withWrapper { wrapper ->
             try {
-                val servers = wrapper.callAttr("get_rmsp_servers_for_geohash", geohash)?.asList()
-                    ?: return@withWrapper null
+                val servers =
+                    wrapper.callAttr("get_rmsp_servers_for_geohash", geohash)?.asList()
+                        ?: return@withWrapper null
                 org.json.JSONArray().apply {
                     servers.forEach { server ->
                         put(org.json.JSONObject(server.toString()))
@@ -541,8 +542,9 @@ class PythonWrapperManager(
     fun getNearestRmspServers(limit: Int = 5): String? =
         withWrapper { wrapper ->
             try {
-                val servers = wrapper.callAttr("get_nearest_rmsp_servers", limit)?.asList()
-                    ?: return@withWrapper null
+                val servers =
+                    wrapper.callAttr("get_nearest_rmsp_servers", limit)?.asList()
+                        ?: return@withWrapper null
                 org.json.JSONArray().apply {
                     servers.forEach { server ->
                         put(org.json.JSONObject(server.toString()))
@@ -573,14 +575,15 @@ class PythonWrapperManager(
     ): String? =
         withWrapper { wrapper ->
             try {
-                val result = wrapper.callAttr(
-                    "query_rmsp_server",
-                    destinationHashHex,
-                    geohash,
-                    zoomRange?.let { Python.getInstance().builtins.callAttr("list", it) },
-                    format,
-                    timeout,
-                )
+                val result =
+                    wrapper.callAttr(
+                        "query_rmsp_server",
+                        destinationHashHex,
+                        geohash,
+                        zoomRange?.let { Python.getInstance().builtins.callAttr("list", it) },
+                        format,
+                        timeout,
+                    )
                 result?.toString()
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to query RMSP server: ${e.message}", e)
@@ -607,14 +610,15 @@ class PythonWrapperManager(
     ): ByteArray? =
         withWrapper { wrapper ->
             try {
-                val result = wrapper.callAttr(
-                    "fetch_rmsp_tiles",
-                    destinationHashHex,
-                    geohash,
-                    zoomRange?.let { Python.getInstance().builtins.callAttr("list", it) },
-                    format,
-                    timeout,
-                )
+                val result =
+                    wrapper.callAttr(
+                        "fetch_rmsp_tiles",
+                        destinationHashHex,
+                        geohash,
+                        zoomRange?.let { Python.getInstance().builtins.callAttr("list", it) },
+                        format,
+                        timeout,
+                    )
                 result?.toJava(ByteArray::class.java)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to fetch RMSP tiles: ${e.message}", e)
