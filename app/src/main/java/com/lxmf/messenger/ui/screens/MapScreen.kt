@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.ShareLocation
@@ -116,6 +117,7 @@ import com.lxmf.messenger.ui.util.MarkerBitmapFactory
 fun MapScreen(
     viewModel: MapViewModel = hiltViewModel(),
     onNavigateToConversation: (destinationHash: String) -> Unit = {},
+    onNavigateToOfflineMaps: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val state by viewModel.state.collectAsState()
@@ -509,6 +511,15 @@ fun MapScreen(
                     .padding(16.dp)
                     .padding(bottom = 80.dp), // Account for bottom navigation bar
         ) {
+            // Offline Maps button
+            SmallFloatingActionButton(
+                onClick = onNavigateToOfflineMaps,
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            ) {
+                Icon(Icons.Default.Download, contentDescription = "Offline Maps")
+            }
+
             // My Location button
             SmallFloatingActionButton(
                 onClick = {
