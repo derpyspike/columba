@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lxmf.messenger.data.repository.IdentityRepository
+import com.lxmf.messenger.map.MapTileSourceManager
 import com.lxmf.messenger.repository.SettingsRepository
 import com.lxmf.messenger.reticulum.model.NetworkStatus
 import com.lxmf.messenger.reticulum.protocol.ReticulumProtocol
@@ -94,6 +95,7 @@ class SettingsViewModel
         private val interfaceConfigManager: com.lxmf.messenger.service.InterfaceConfigManager,
         private val propagationNodeManager: PropagationNodeManager,
         private val locationSharingManager: com.lxmf.messenger.service.LocationSharingManager,
+        private val mapTileSourceManager: MapTileSourceManager,
     ) : ViewModel() {
         companion object {
             private const val TAG = "SettingsViewModel"
@@ -1297,6 +1299,20 @@ class SettingsViewModel
             viewModelScope.launch {
                 settingsRepository.mapSourceRmspEnabledFlow.collect { enabled ->
                     _state.update { it.copy(mapSourceRmspEnabled = enabled) }
+                }
+            }
+            // Collect RMSP server count from MapTileSourceManager
+            viewModelScope.launch {
+                mapTileSourceManager.observeRmspServerCount().collect { count ->
+                    Log.d(TAG, "RMSP server count updated: $count")
+                    _state.update { it.copy(rmspServerCount = count) }
+                }
+            }
+            // Collect offline maps availability
+            viewModelScope.launch {
+                mapTileSourceManager.hasOfflineMaps().collect { hasOffline ->
+                    Log.d(TAG, "Has offline maps updated: $hasOffline")
+                    _state.update { it.copy(hasOfflineMaps = hasOffline) }
                 }
             }
         }
