@@ -2331,4 +2331,293 @@ class SettingsViewModelTest {
         }
 
     // endregion
+
+    // region Map Source Settings Tests
+
+    @Test
+    fun `setMapSourceHttpEnabled true saves to repository`() =
+        runTest {
+            viewModel = createViewModel()
+
+            viewModel.setMapSourceHttpEnabled(true)
+
+            coVerify { settingsRepository.saveMapSourceHttpEnabled(true) }
+        }
+
+    @Test
+    fun `setMapSourceHttpEnabled false saves to repository when RMSP enabled`() =
+        runTest {
+            val rmspEnabledFlow = MutableStateFlow(true)
+            every { settingsRepository.mapSourceRmspEnabledFlow } returns rmspEnabledFlow
+
+            viewModel = createViewModel()
+
+            // Wait for state to load
+            viewModel.state.test {
+                var state = awaitItem()
+                var loadAttempts = 0
+                while (state.isLoading && loadAttempts++ < 50) {
+                    state = awaitItem()
+                }
+                cancelAndConsumeRemainingEvents()
+            }
+
+            viewModel.setMapSourceHttpEnabled(false)
+
+            coVerify { settingsRepository.saveMapSourceHttpEnabled(false) }
+        }
+
+    @Test
+    fun `setMapSourceHttpEnabled false saves to repository when offline maps exist`() =
+        runTest {
+            val hasOfflineMapsFlow = MutableStateFlow(true)
+            every { mapTileSourceManager.hasOfflineMaps() } returns hasOfflineMapsFlow
+
+            viewModel = createViewModel()
+
+            // Wait for state to load
+            viewModel.state.test {
+                var state = awaitItem()
+                var loadAttempts = 0
+                while (state.isLoading && loadAttempts++ < 50) {
+                    state = awaitItem()
+                }
+                cancelAndConsumeRemainingEvents()
+            }
+
+            viewModel.setMapSourceHttpEnabled(false)
+
+            coVerify { settingsRepository.saveMapSourceHttpEnabled(false) }
+        }
+
+    @Test
+    fun `setMapSourceHttpEnabled false does not save when only source`() =
+        runTest {
+            // Both RMSP and offline maps disabled - HTTP cannot be disabled
+            val rmspEnabledFlow = MutableStateFlow(false)
+            val hasOfflineMapsFlow = MutableStateFlow(false)
+            every { settingsRepository.mapSourceRmspEnabledFlow } returns rmspEnabledFlow
+            every { mapTileSourceManager.hasOfflineMaps() } returns hasOfflineMapsFlow
+
+            viewModel = createViewModel()
+
+            // Wait for state to load
+            viewModel.state.test {
+                var state = awaitItem()
+                var loadAttempts = 0
+                while (state.isLoading && loadAttempts++ < 50) {
+                    state = awaitItem()
+                }
+                cancelAndConsumeRemainingEvents()
+            }
+
+            viewModel.setMapSourceHttpEnabled(false)
+
+            // Should NOT save because HTTP is the only source
+            coVerify(exactly = 0) { settingsRepository.saveMapSourceHttpEnabled(false) }
+        }
+
+    @Test
+    fun `setMapSourceRmspEnabled true saves to repository`() =
+        runTest {
+            viewModel = createViewModel()
+
+            viewModel.setMapSourceRmspEnabled(true)
+
+            coVerify { settingsRepository.saveMapSourceRmspEnabled(true) }
+        }
+
+    @Test
+    fun `setMapSourceRmspEnabled false saves to repository when HTTP enabled`() =
+        runTest {
+            val httpEnabledFlow = MutableStateFlow(true)
+            every { settingsRepository.mapSourceHttpEnabledFlow } returns httpEnabledFlow
+
+            viewModel = createViewModel()
+
+            // Wait for state to load
+            viewModel.state.test {
+                var state = awaitItem()
+                var loadAttempts = 0
+                while (state.isLoading && loadAttempts++ < 50) {
+                    state = awaitItem()
+                }
+                cancelAndConsumeRemainingEvents()
+            }
+
+            viewModel.setMapSourceRmspEnabled(false)
+
+            coVerify { settingsRepository.saveMapSourceRmspEnabled(false) }
+        }
+
+    @Test
+    fun `setMapSourceRmspEnabled false does not save when only source`() =
+        runTest {
+            // Both HTTP and offline maps disabled - RMSP cannot be disabled
+            val httpEnabledFlow = MutableStateFlow(false)
+            val hasOfflineMapsFlow = MutableStateFlow(false)
+            every { settingsRepository.mapSourceHttpEnabledFlow } returns httpEnabledFlow
+            every { mapTileSourceManager.hasOfflineMaps() } returns hasOfflineMapsFlow
+
+            viewModel = createViewModel()
+
+            // Wait for state to load
+            viewModel.state.test {
+                var state = awaitItem()
+                var loadAttempts = 0
+                while (state.isLoading && loadAttempts++ < 50) {
+                    state = awaitItem()
+                }
+                cancelAndConsumeRemainingEvents()
+            }
+
+            viewModel.setMapSourceRmspEnabled(false)
+
+            // Should NOT save because RMSP is the only source
+            coVerify(exactly = 0) { settingsRepository.saveMapSourceRmspEnabled(false) }
+        }
+
+    @Test
+    fun `state collects mapSourceHttpEnabled from repository`() =
+        runTest {
+            val httpEnabledFlow = MutableStateFlow(true)
+            every { settingsRepository.mapSourceHttpEnabledFlow } returns httpEnabledFlow
+
+            viewModel = createViewModel()
+
+            viewModel.state.test {
+                var state = awaitItem()
+                var loadAttempts = 0
+                while (state.isLoading && loadAttempts++ < 50) {
+                    state = awaitItem()
+                }
+
+                assertTrue(state.mapSourceHttpEnabled)
+
+                // Update flow to false
+                httpEnabledFlow.value = false
+                state = awaitItem()
+                assertFalse(state.mapSourceHttpEnabled)
+
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `state collects mapSourceRmspEnabled from repository`() =
+        runTest {
+            val rmspEnabledFlow = MutableStateFlow(false)
+            every { settingsRepository.mapSourceRmspEnabledFlow } returns rmspEnabledFlow
+
+            viewModel = createViewModel()
+
+            viewModel.state.test {
+                var state = awaitItem()
+                var loadAttempts = 0
+                while (state.isLoading && loadAttempts++ < 50) {
+                    state = awaitItem()
+                }
+
+                assertFalse(state.mapSourceRmspEnabled)
+
+                // Update flow to true
+                rmspEnabledFlow.value = true
+                state = awaitItem()
+                assertTrue(state.mapSourceRmspEnabled)
+
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `state collects rmspServerCount from mapTileSourceManager`() =
+        runTest {
+            val serverCountFlow = MutableStateFlow(0)
+            every { mapTileSourceManager.observeRmspServerCount() } returns serverCountFlow
+
+            viewModel = createViewModel()
+
+            viewModel.state.test {
+                var state = awaitItem()
+                var loadAttempts = 0
+                while (state.isLoading && loadAttempts++ < 50) {
+                    state = awaitItem()
+                }
+
+                assertEquals(0, state.rmspServerCount)
+
+                // Update flow with servers
+                serverCountFlow.value = 3
+                state = awaitItem()
+                assertEquals(3, state.rmspServerCount)
+
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `state collects hasOfflineMaps from mapTileSourceManager`() =
+        runTest {
+            val hasOfflineMapsFlow = MutableStateFlow(false)
+            every { mapTileSourceManager.hasOfflineMaps() } returns hasOfflineMapsFlow
+
+            viewModel = createViewModel()
+
+            viewModel.state.test {
+                var state = awaitItem()
+                var loadAttempts = 0
+                while (state.isLoading && loadAttempts++ < 50) {
+                    state = awaitItem()
+                }
+
+                assertFalse(state.hasOfflineMaps)
+
+                // Update flow to true
+                hasOfflineMapsFlow.value = true
+                state = awaitItem()
+                assertTrue(state.hasOfflineMaps)
+
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `map source settings are preserved across state changes`() =
+        runTest {
+            val httpEnabledFlow = MutableStateFlow(false)
+            val rmspEnabledFlow = MutableStateFlow(true)
+            every { settingsRepository.mapSourceHttpEnabledFlow } returns httpEnabledFlow
+            every { settingsRepository.mapSourceRmspEnabledFlow } returns rmspEnabledFlow
+
+            viewModel = createViewModel()
+
+            viewModel.state.test {
+                var state = awaitItem()
+                var loadAttempts = 0
+                while (state.isLoading && loadAttempts++ < 50) {
+                    state = awaitItem()
+                }
+
+                assertFalse(state.mapSourceHttpEnabled)
+                assertTrue(state.mapSourceRmspEnabled)
+
+                // Change another unrelated setting
+                autoAnnounceEnabledFlow.value = false
+                state = awaitItem()
+
+                // Map source settings should be preserved
+                assertFalse(
+                    "mapSourceHttpEnabled should be preserved",
+                    state.mapSourceHttpEnabled,
+                )
+                assertTrue(
+                    "mapSourceRmspEnabled should be preserved",
+                    state.mapSourceRmspEnabled,
+                )
+
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
+    // endregion
 }
