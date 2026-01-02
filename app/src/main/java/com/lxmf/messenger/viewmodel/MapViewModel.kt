@@ -54,7 +54,8 @@ data class ContactMarker(
     val timestamp: Long = 0L,
     val expiresAt: Long? = null,
     val state: MarkerState = MarkerState.FRESH,
-    val approximateRadius: Int = 0, // Coarsening radius in meters (0 = precise)
+    // Coarsening radius in meters (0 = precise)
+    val approximateRadius: Int = 0,
 )
 
 /**
